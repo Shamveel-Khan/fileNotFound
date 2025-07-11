@@ -187,7 +187,7 @@ let timeOnPage = 0;
                 document.querySelector('.eye4').classList.remove('hidden');
                 
                 if (isMobile) {
-                    startMobileEyeMovement();
+                    startAdditionalMobileEyes();
                 }
             }
                         
@@ -299,7 +299,7 @@ let timeOnPage = 0;
             blinkInterval = setInterval(randomEyeBlink, 3000);
             
             if (isMobile) {
-                startMobileEyeMovement();
+                startInitialMobileEyes(); 
                 document.addEventListener('touchmove', handleTouchInteraction);
                 document.addEventListener('touchstart', handleTouchInteraction);
             } else {
@@ -313,3 +313,36 @@ let timeOnPage = 0;
         }
         
         window.onload = init;
+
+        function startMovingEye(eye, delay) {
+            setTimeout(() => {
+                moveEyeRandomly(eye);
+                const interval = setInterval(() => {
+                    moveEyeRandomly(eye);
+                }, 1000);
+                mobileEyeIntervals.push(interval);
+            }, delay);
+        }
+        
+        function startInitialMobileEyes() {
+            const initialEyes = document.querySelectorAll('.eye:not(.hidden)');
+            
+            document.getElementById('mobile-warning').style.opacity = '1';
+            
+            initialEyes.forEach((eye, index) => {
+                // Each eye gets a different phase delay (0ms, 250ms, etc.)
+                const phaseDelay = index * 250;
+                startMovingEye(eye, phaseDelay);
+            });
+        }
+
+        function startAdditionalMobileEyes() {
+            const newEyes = document.querySelectorAll('.eye3, .eye4');
+            
+            newEyes.forEach((eye, index) => {
+                // Continue the phase pattern (500ms, 750ms for new eyes)
+                const phaseDelay = (index + 2) * 250; // +2 to continue from previous eyes
+                startMovingEye(eye, phaseDelay);
+            });
+        }
+
