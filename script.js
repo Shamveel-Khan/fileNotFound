@@ -120,31 +120,29 @@ let timeOnPage = 0;
         }
         
         function moveEyeRandomly(eye) {
-            const randomX = (Math.random() - 0.5) * 20; // -10 to 10px
-            const randomY = (Math.random() - 0.5) * 20; // -10 to 10px
+            const randomX = (Math.random() - 0.5) * 20;
+            const randomY = (Math.random() - 0.5) * 20;
             
             eye.style.setProperty('--pupil-x', randomX + 'px');
             eye.style.setProperty('--pupil-y', randomY + 'px');
         }
         
-        function startMobileEyeMovement() {
-            const eyes = document.querySelectorAll('.eye:not(.hidden)');
-            
-            document.getElementById('mobile-warning').style.opacity = '1';
-            
-            eyes.forEach((eye, index) => {
-                // Each eye gets a different phase delay (0ms, 250ms, 500ms, 750ms)
-                const phaseDelay = index * 250;
-                
-                setTimeout(() => {
+        function startMobileEyeMovementForEye(eye, delay) {
+            setTimeout(() => {
+                moveEyeRandomly(eye);
+                const interval = setInterval(() => {
                     moveEyeRandomly(eye);
-                    
-                    const interval = setInterval(() => {
-                        moveEyeRandomly(eye);
-                    }, 1000); // Move every second
-                    
-                    mobileEyeIntervals.push(interval);
-                }, phaseDelay);
+                }, 1000);
+                mobileEyeIntervals.push(interval);
+            }, delay);
+        }
+
+        function startAllMobileEyes() {
+            const eyes = document.querySelectorAll('.eye:not(.hidden)');
+                        
+            eyes.forEach((eye, index) => {
+                const phaseDelay = index * 250; // 0ms, 250ms, 500ms, 750ms
+                startMobileEyeMovementForEye(eye, phaseDelay);
             });
         }
         
@@ -187,10 +185,13 @@ let timeOnPage = 0;
                 document.querySelector('.eye4').classList.remove('hidden');
                 
                 if (isMobile) {
-                    startAdditionalMobileEyes();
+                    // Restart movement for all eyes to include the new ones
+                    mobileEyeIntervals.forEach(clearInterval);
+                    mobileEyeIntervals = [];
+                    startAllMobileEyes();
                 }
             }
-                        
+                                
             if (timeOnPage === 15) {
                 document.querySelector('.title').classList.add('glitch');
             }
@@ -299,7 +300,8 @@ let timeOnPage = 0;
             blinkInterval = setInterval(randomEyeBlink, 3000);
             
             if (isMobile) {
-                startInitialMobileEyes(); 
+                // Start initial eyes immediately
+                startAllMobileEyes();
                 document.addEventListener('touchmove', handleTouchInteraction);
                 document.addEventListener('touchstart', handleTouchInteraction);
             } else {
